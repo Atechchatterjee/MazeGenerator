@@ -1,26 +1,20 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useState} from 'react';
+import RecursiveBackTrack from './Algorithms/RecursiveBackTrack';
+import Grid from './components/Grid';
+import {GridContext} from './context/GridContext';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const App: React.FC = () => {
+	const [gridStructure, updateGridStructure] = useState<any[][]>([]);
+
+	return (
+		<div className="main">
+			<GridContext.Provider value={{gridStructure, updateGridStructure}}>
+				<Grid />
+				<RecursiveBackTrack />
+			</GridContext.Provider>
+		</div>
+	);
+};
 
 export default App;
