@@ -1,6 +1,10 @@
 .display {
-  display: block;
+	display: block;
 }
 .noDisplay {
-  display: none;
+	display: none;
+}
+.cell:hover {
+	background-color: rgb(201, 222, 250) !important;
+	opacity: 0.7;
 }

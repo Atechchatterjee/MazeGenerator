@@ -1,4 +1,3 @@
-import {useRef} from 'react';
 import {GridElement} from '../types/GridTypes';
 
 export interface Neighbors {
@@ -17,7 +16,6 @@ export default class GridOperation {
 		this.grid_structure = grid_structure;
 	}
 
-	// changes few properties of the given element
 	changeElement = (
 		element: GridElement,
 		walls?: any,
@@ -54,7 +52,7 @@ export default class GridOperation {
 			};
 		}
 
-		if (!!color) {
+		if (color) {
 			return {
 				width: element.width,
 				height: element.height,
@@ -68,7 +66,7 @@ export default class GridOperation {
 		return element;
 	};
 
-	// elements = (left, right, top, bottom)
+	//  neighboring elements -> (left, right, top, bottom)
 	getNeighborElements = (row: number, column: number): Neighbors => {
 		let neighbors: Neighbors = {};
 
@@ -91,57 +89,51 @@ export default class GridOperation {
 
 		const {left, right, top, bottom} = walls;
 		// removing walls of current element
-		const elementToBeChanged: GridElement = this.changeElement(element, walls);
+		const currentElement: GridElement = this.changeElement(element, walls);
 
 		// removing walls from the adjacent elements
 		for (const row of this.grid_structure.current) {
 			let newRow = [];
 
-			for (let currentElement of row) {
-				let changedElement: GridElement = currentElement;
+			for (let element of row) {
+				let changedElement: GridElement = element;
 				let flag = false; // to check if any wall is removed from adjacent element
 
-				if (left === false && this.isLeft(elementToBeChanged, currentElement)) {
-					changedElement = this.changeElement(currentElement, {
+				if (left === false && this.isLeft(currentElement, element)) {
+					changedElement = this.changeElement(element, {
 						right: false,
 					});
 					flag = true;
 				}
 
-				if (
-					right === false &&
-					this.isRight(elementToBeChanged, currentElement)
-				) {
-					changedElement = this.changeElement(currentElement, {
+				if (right === false && this.isRight(currentElement, element)) {
+					changedElement = this.changeElement(element, {
 						left: false,
 					});
 					flag = true;
 				}
 
-				if (
-					bottom === false &&
-					this.isBottom(elementToBeChanged, currentElement)
-				) {
-					changedElement = this.changeElement(currentElement, {
+				if (bottom === false && this.isBottom(currentElement, element)) {
+					changedElement = this.changeElement(element, {
 						top: false,
 					});
 					flag = true;
 				}
 
-				if (top === false && this.isTop(elementToBeChanged, currentElement)) {
-					changedElement = this.changeElement(currentElement, {
+				if (top === false && this.isTop(currentElement, element)) {
+					changedElement = this.changeElement(element, {
 						bottom: false,
 					});
 					flag = true;
 				}
 
-				if (this.isSameElement(currentElement, elementToBeChanged)) {
-					newRow.push(elementToBeChanged);
+				if (this.isSameElement(element, currentElement)) {
+					newRow.push(currentElement);
 				} else if (flag) {
 					// when the walls of the adjacent elements is changed
 					newRow.push(changedElement);
 				} else {
-					newRow.push(currentElement);
+					newRow.push(element);
 				}
 			}
 
@@ -160,6 +152,7 @@ export default class GridOperation {
 
 		return true;
 	};
+
 	// checks position w.r.t current element
 	isLeft = (current: GridElement, element: GridElement): boolean =>
 		current.row === element.row && current.column - 1 === element.column;

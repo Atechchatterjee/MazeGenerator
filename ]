@@ -87,13 +87,13 @@ const RecursiveBackTrack: React.FC<{
                 generateMaze(Object.values(shuffledNeighbors[1])[0]);
 
                 setTimeout(() => {
-                    removeNeigborWalls(
-                        currentElement,
-                        shuffledNeighbors[2]
-                    );
                     generateMaze(Object.values(shuffledNeighbors[2])[0]);
 
                     setTimeout(() => {
+                        removeNeigborWalls(
+                            currentElement,
+                            shuffledNeighbors[3]
+                        );
                         removeNeigborWalls(
                             currentElement,
                             shuffledNeighbors[3]

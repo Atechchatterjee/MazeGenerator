@@ -1,14 +1,14 @@
-import React, {useContext, useRef, useEffect} from 'react';
+import React, {useState, useContext, useRef, useEffect} from 'react';
 import {GridElement, GridContextProps} from '../types/GridTypes';
 import {GridContext} from '../context/GridContext';
 
-const Grid: React.FC = () => {
+const Grid: React.FC<{callback?: Function}> = ({callback}) => {
 	const {gridStructure, updateGridStructure} = useContext<GridContextProps>(
 		GridContext
 	);
 
-	const rows = useRef<number>(30);
-	const column = useRef<number>(30);
+	const rows = useRef<number>(20);
+	const column = useRef<number>(20);
 	const mount = useRef<number>(0);
 
 	// creates the grid structure
@@ -21,8 +21,8 @@ const Grid: React.FC = () => {
 			let g = [];
 			for (let j = 0; j < column.current; j++) {
 				g.push({
-					height: 20,
-					width: 20,
+					height: 30,
+					width: 30,
 					row: i,
 					column: j,
 					color: '#fff',
@@ -55,6 +55,10 @@ const Grid: React.FC = () => {
 							{rows.map(({width, height, row, column, walls, color}) => {
 								return (
 									<td
+										className="cell"
+										onClick={() => {
+											if (callback) callback({row, column});
+										}}
 										id={`${row}-${column}`}
 										style={{
 											height: `${height}px`,
@@ -74,6 +78,7 @@ const Grid: React.FC = () => {
 											borderBottom: `${
 												walls.bottom ? '1px solid black' : '1px solid white'
 											}`,
+											cursor: 'pointer',
 										}}
 									></td>
 								);
