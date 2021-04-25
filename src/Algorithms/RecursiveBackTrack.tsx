@@ -76,10 +76,9 @@ const RecursiveBackTrack: React.FC<{
         // picking a random neighbor
         const randomNeighbor: GridElement = shuffledNeighbors[0];
 
-        removeNeigborWalls(currentElement, randomNeighbor);
-
         const time = 500;
         setTimeout(() => {
+            removeNeigborWalls(currentElement, randomNeighbor);
             generateMaze(Object.values(shuffledNeighbors[0])[0]);
 
             setTimeout(() => {
@@ -87,17 +86,12 @@ const RecursiveBackTrack: React.FC<{
                 generateMaze(Object.values(shuffledNeighbors[1])[0]);
 
                 setTimeout(() => {
-                    removeNeigborWalls(
-                        currentElement,
-                        shuffledNeighbors[2]
-                    );
+                    removeNeigborWalls(currentElement, shuffledNeighbors[2]);
                     generateMaze(Object.values(shuffledNeighbors[2])[0]);
 
                     setTimeout(() => {
-                        removeNeigborWalls(
-                            currentElement,
-                            shuffledNeighbors[3]
-                        );
+                        removeNeigborWalls(currentElement, shuffledNeighbors[3]);
+                        generateMaze(Object.values(shuffledNeighbors[3])[0]);
                     }, time);
                 }, time);
             }, time);
