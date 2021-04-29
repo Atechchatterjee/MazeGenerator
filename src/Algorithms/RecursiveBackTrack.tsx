@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import {GridElement, GridContextProps} from '../types/GridTypes';
 import {GridContext} from '../context/GridContext';
 import GridOperations, {Neighbors} from '../components/GridOperations';
@@ -6,15 +6,18 @@ import GridOperations, {Neighbors} from '../components/GridOperations';
 const RecursiveBackTrack: React.FC<{
 	startRow?: number;
 	startColumn?: number;
-}> = ({startRow, startColumn}) => {
-	const {gridStructure, updateGridStructure} = useContext<GridContextProps>(
-		GridContext
-	);
+	mazeBorderColor: string;
+}> = ({startRow, startColumn, mazeBorderColor}) => {
+	const {gridStructure, updateGridStructure, updateMazeComplete} = useContext<
+		GridContextProps
+	>(GridContext);
 	const grid_structure = useRef<GridElement[][]>(gridStructure);
 	const mount = useRef<number>(0);
 	const gridOp = new GridOperations(grid_structure);
+	const time = useRef<number>(20);
+	const [curNodeSetColor, updateCurNodeSetColor] = useState<GridElement>();
 
-	const allNeighborsVisited = (neighbors: Neighbors): boolean => {
+	const isAllNeighborsVisited = (neighbors: Neighbors): boolean => {
 		for (const neighbor of Object.values(neighbors)) {
 			if (neighbor) {
 				if (!gridOp.visited[gridOp.getGridElementIndex(neighbor)]) return false;
@@ -24,6 +27,7 @@ const RecursiveBackTrack: React.FC<{
 		return true;
 	};
 
+	// removes the wall of the current element which joins the randomNeighbor
 	const removeNeigborWalls = (
 		currentElement: GridElement,
 		randomNeighbor: GridElement
@@ -32,7 +36,6 @@ const RecursiveBackTrack: React.FC<{
 
 		let randomNeighborElement: GridElement = Object.values(randomNeighbor)[0];
 
-		// removing a wall of the current element to visit the randomNeighbor
 		if (!gridOp.visited[gridOp.getGridElementIndex(randomNeighborElement)]) {
 			let walls: any = {};
 			walls[Object.keys(randomNeighbor)[0]] = false;
@@ -42,21 +45,22 @@ const RecursiveBackTrack: React.FC<{
 		}
 	};
 
-	const generateMaze = (currentElement: GridElement) => {
-		if (!currentElement) {
-			return;
+	const timeout = (delay: number) =>
+		new Promise((resolve) => setTimeout(resolve, delay));
+
+	const generateMaze = async (currentElement: GridElement): Promise<void> => {
+		if (!currentElement) return new Promise((resolve) => resolve());
+
+		// updateCurNodeSetColor(currentElement);
+
+		if (gridOp.visited[gridOp.getGridElementIndex(currentElement)]) {
+			updateCurNodeSetColor(currentElement);
+			return new Promise((resolve) => {
+				resolve();
+			});
 		}
 
-		// if current element is not visited => return
-		if (gridOp.visited[gridOp.getGridElementIndex(currentElement)]) return;
-
 		gridOp.visited[gridOp.getGridElementIndex(currentElement)] = true;
-
-		const originalColor =
-			grid_structure.current[currentElement.row][currentElement.column].color;
-
-		grid_structure.current[currentElement.row][currentElement.column].color =
-			'#8896E0';
 
 		// getting neighboring elements
 		let neighbors: Neighbors = gridOp.getNeighborElements(
@@ -64,55 +68,64 @@ const RecursiveBackTrack: React.FC<{
 			currentElement.column
 		);
 
-		if (allNeighborsVisited(neighbors)) {
-			grid_structure.current[currentElement.row][
-				currentElement.column
-			].color = originalColor;
-			return;
+		if (isAllNeighborsVisited(neighbors)) {
+			updateCurNodeSetColor(currentElement);
+			return new Promise((resolve) => {
+				resolve();
+			});
 		}
 
 		const shuffledNeighbors: {
 			[keys: string]: GridElement;
 		} = gridOp.shuffleNeigbhors(neighbors);
 
-		// picking a random neighbor
-		const randomNeighbor: GridElement = shuffledNeighbors[0];
+		await timeout(time.current).then(async () => {
+			// to highlight the start element
+			updateCurNodeSetColor(currentElement);
+			removeNeigborWalls(currentElement, shuffledNeighbors[0]);
 
-		const time = 200;
-		setTimeout(() => {
-			removeNeigborWalls(currentElement, randomNeighbor);
-			generateMaze(Object.values(shuffledNeighbors[0])[0]);
-			setTimeout(() => {
-				grid_structure.current[currentElement.row][
-					currentElement.column
-				].color = originalColor;
-				removeNeigborWalls(currentElement, shuffledNeighbors[1]);
-				generateMaze(Object.values(shuffledNeighbors[1])[0]);
-
-				setTimeout(() => {
-					grid_structure.current[currentElement.row][
-						currentElement.column
-					].color = originalColor;
-					removeNeigborWalls(currentElement, shuffledNeighbors[2]);
-					generateMaze(Object.values(shuffledNeighbors[2])[0]);
-
-					setTimeout(() => {
-						removeNeigborWalls(currentElement, shuffledNeighbors[3]);
-						generateMaze(Object.values(shuffledNeighbors[3])[0]);
-					}, time);
-				}, time);
-			}, time);
-		}, time);
+			updateCurNodeSetColor(Object.values(shuffledNeighbors[0])[0]);
+			removeNeigborWalls(currentElement, shuffledNeighbors[0]);
+			await generateMaze(Object.values(shuffledNeighbors[0])[0]);
+		});
+		await timeout(time.current).then(async () => {
+			updateCurNodeSetColor(Object.values(shuffledNeighbors[1])[0]);
+			removeNeigborWalls(currentElement, shuffledNeighbors[1]);
+			await generateMaze(Object.values(shuffledNeighbors[1])[0]);
+		});
+		await timeout(time.current).then(async () => {
+			updateCurNodeSetColor(Object.values(shuffledNeighbors[2])[0]);
+			removeNeigborWalls(currentElement, shuffledNeighbors[2]);
+			await generateMaze(Object.values(shuffledNeighbors[2])[0]);
+		});
+		await timeout(time.current).then(async () => {
+			updateCurNodeSetColor(Object.values(shuffledNeighbors[3])[0]);
+			removeNeigborWalls(currentElement, shuffledNeighbors[3]);
+			await generateMaze(Object.values(shuffledNeighbors[3])[0]);
+		});
 	};
 
 	useEffect(() => {
 		if (gridStructure.length > 0 && mount.current === 0) {
 			grid_structure.current = gridStructure;
-			if (startRow !== undefined && startColumn !== undefined)
-				generateMaze(gridStructure[startRow][startColumn]);
+			if (startRow !== undefined && startColumn !== undefined) {
+				generateMaze(gridStructure[startRow][startColumn]).then(() => {
+					console.log('maze has been generated');
+					updateMazeComplete(true);
+				});
+			}
 			mount.current++;
 		}
 	}, [startRow, startColumn, grid_structure]);
+
+	useEffect(() => {
+		if (curNodeSetColor) {
+			grid_structure.current[curNodeSetColor.row][
+				curNodeSetColor.column
+			].color = mazeBorderColor;
+			updateGridStructure(grid_structure.current);
+		}
+	}, [curNodeSetColor, grid_structure]);
 
 	return <></>;
 };

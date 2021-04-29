@@ -2,7 +2,10 @@ import React, {useState, useContext, useRef, useEffect} from 'react';
 import {GridElement, GridContextProps} from '../types/GridTypes';
 import {GridContext} from '../context/GridContext';
 
-const Grid: React.FC<{callback?: Function}> = ({callback}) => {
+const Grid: React.FC<{callback?: Function; mazeBorderColor: string}> = ({
+	callback,
+	mazeBorderColor,
+}) => {
 	const {gridStructure, updateGridStructure} = useContext<GridContextProps>(
 		GridContext
 	);
@@ -11,13 +14,17 @@ const Grid: React.FC<{callback?: Function}> = ({callback}) => {
 
 	const cellHeight = useRef<number>(30);
 	const cellWidth = useRef<number>(30);
+	const borderWidth = useRef<number>(1);
 	const rows = useRef<number>(
-		Math.floor((windowHeight.current * 0.85) / (cellHeight.current + 2))
+		Math.floor(
+			(windowHeight.current * 0.45) / (cellHeight.current + borderWidth.current)
+		)
 	);
 	const column = useRef<number>(
-		Math.floor((windowWidth.current * 0.85) / (cellWidth.current + 2))
+		Math.floor(
+			(windowWidth.current * 0.45) / (cellWidth.current + borderWidth.current)
+		)
 	);
-
 	const mount = useRef<number>(0);
 
 	// creates the grid structure
@@ -59,8 +66,9 @@ const Grid: React.FC<{callback?: Function}> = ({callback}) => {
 		<div style={{textAlign: 'center'}}>
 			<table
 				style={{
-					border: '1px solid black',
+					border: `${borderWidth.current}px solid black`,
 					borderCollapse: 'collapse',
+					float: 'left',
 				}}
 			>
 				<tbody>
@@ -79,19 +87,35 @@ const Grid: React.FC<{callback?: Function}> = ({callback}) => {
 												height: `${height}px`,
 												width: `${width}px`,
 												float: 'left',
-												backgroundColor: `${!!color ? color : 'white'}`,
+												backgroundColor: `${color}`,
 												borderCollapse: 'collapse',
 												borderLeft: `${
-													walls.left ? '1px solid black' : '1px solid white'
+													walls.left
+														? borderWidth.current + 'px solid black'
+														: borderWidth.current +
+														  'px solid ' +
+														  mazeBorderColor
 												}`,
 												borderRight: `${
-													walls.right ? '1px solid black' : '1px solid white'
+													walls.right
+														? borderWidth.current + 'px solid black'
+														: borderWidth.current +
+														  'px solid ' +
+														  mazeBorderColor
 												}`,
 												borderTop: `${
-													walls.top ? '1px solid black' : '1px solid white'
+													walls.top
+														? borderWidth.current + 'px solid black'
+														: borderWidth.current +
+														  'px solid ' +
+														  mazeBorderColor
 												}`,
 												borderBottom: `${
-													walls.bottom ? '1px solid black' : '1px solid white'
+													walls.bottom
+														? borderWidth.current + 'px solid black'
+														: borderWidth.current +
+														  'px solid ' +
+														  mazeBorderColor
 												}`,
 												cursor: 'pointer',
 											}}

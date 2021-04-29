@@ -15,6 +15,8 @@ export interface GridElement {
 export interface GridContextProps {
     gridStructure: GridElement[][];
     updateGridStructure: Function;
+    mazeComplete: boolean;
+    updateMazeComplete: Function;
 }
 
 
