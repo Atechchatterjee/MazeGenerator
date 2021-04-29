@@ -19,7 +19,7 @@ export default class GridOperation {
 	changeElement = (
 		element: GridElement,
 		walls?: any,
-		color?: string
+		//color?: string
 	): GridElement => {
 		if (walls) {
 			const row: number = element.row;
@@ -52,16 +52,16 @@ export default class GridOperation {
 			};
 		}
 
-		if (color) {
-			return {
-				width: element.width,
-				height: element.height,
-				row: element.row,
-				column: element.column,
-				walls: walls,
-				color: color,
-			};
-		}
+		//if (color) {
+			//return {
+				//width: element.width,
+				//height: element.height,
+				//row: element.row,
+				//column: element.column,
+				//walls: walls,
+				//color: color,
+			//};
+		//}
 
 		return element;
 	};
@@ -188,6 +188,7 @@ export default class GridOperation {
 		const result: any = [];
 
 		let elementMap = [left, right, bottom, top];
+
 		const indexMap: {[keys: number]: string} = {
 			0: 'left',
 			1: 'right',
