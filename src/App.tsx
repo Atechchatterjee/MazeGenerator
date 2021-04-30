@@ -1,9 +1,11 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useEffect} from 'react';
 import RecursiveBackTrack from './Algorithms/RecursiveBackTrack';
 import Grid from './components/Grid';
 import Astar from './Algorithms/Astar';
 import {GridContext} from './context/GridContext';
 import {GridElement} from './types/GridTypes';
+import {Snackbar} from '@material-ui/core';
+import {Alert} from '@material-ui/lab';
 import {BlockPicker} from 'react-color';
 import './App.css';
 import {Button} from '@material-ui/core';
@@ -19,6 +21,14 @@ const App: React.FC = () => {
 	const [toggleColorSelector, setToggleColorSelector] = useState<boolean>(
 		false
 	);
+	const [resetingGrid, setResetingGrid] = useState<boolean>(false);
+	const [openSnackBar, setOpenStackBar] = useState<boolean>(mazeComplete);
+	const vertical = 'top';
+	const horizontal = 'center';
+
+	useEffect(() => {
+		setOpenStackBar(mazeComplete);
+	}, [mazeComplete]);
 
 	return (
 		<div className="main">
@@ -28,13 +38,21 @@ const App: React.FC = () => {
 					updateGridStructure,
 					mazeComplete,
 					updateMazeComplete,
+					resetingGrid,
+					setResetingGrid,
 				}}
 			>
 				<Grid
-					callback={({row, column}: {row: number; column: number}) => {
-						// alert(row + ' ' + column);
+					clickedCb={({row, column}: {row: number; column: number}) => {
 						updateStartRow(row);
 						updateStartColumn(column);
+						updateMazeComplete(false);
+					}}
+					resetCb={() => {
+						setResetingGrid(true);
+						setSelectedColor('#A0BAD3');
+						updateStartColumn(undefined);
+						updateStartRow(undefined);
 					}}
 					mazeBorderColor={selectedColor}
 				/>
@@ -43,7 +61,7 @@ const App: React.FC = () => {
 					startRow={startRow}
 					mazeBorderColor={selectedColor}
 				/>
-				{gridStructure.length > 0 ? (
+				{mazeComplete ? (
 					<Astar
 						startNode={gridStructure[0][0]}
 						endNode={
@@ -75,6 +93,14 @@ const App: React.FC = () => {
 						<></>
 					)}
 				</div>
+				<Snackbar
+					open={openSnackBar}
+					autoHideDuration={3000}
+					onClose={() => setOpenStackBar(false)}
+					anchorOrigin={{vertical, horizontal}}
+				>
+					<Alert severity="success">Maze has been Generated!</Alert>
+				</Snackbar>
 			</GridContext.Provider>
 		</div>
 	);

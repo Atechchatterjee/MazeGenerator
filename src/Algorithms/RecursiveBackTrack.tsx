@@ -8,13 +8,17 @@ const RecursiveBackTrack: React.FC<{
 	startColumn?: number;
 	mazeBorderColor: string;
 }> = ({startRow, startColumn, mazeBorderColor}) => {
-	const {gridStructure, updateGridStructure, updateMazeComplete} = useContext<
-		GridContextProps
-	>(GridContext);
+	const {
+		gridStructure,
+		updateGridStructure,
+		updateMazeComplete,
+		resetingGrid,
+		setResetingGrid,
+	} = useContext<GridContextProps>(GridContext);
 	const grid_structure = useRef<GridElement[][]>(gridStructure);
 	const mount = useRef<number>(0);
 	const gridOp = new GridOperations(grid_structure);
-	const time = useRef<number>(20);
+	const time = useRef<number>(2);
 	const [curNodeSetColor, updateCurNodeSetColor] = useState<GridElement>();
 
 	const isAllNeighborsVisited = (neighbors: Neighbors): boolean => {
@@ -106,17 +110,24 @@ const RecursiveBackTrack: React.FC<{
 	};
 
 	useEffect(() => {
-		if (gridStructure.length > 0 && mount.current === 0) {
+		if (resetingGrid) {
+			mount.current = -1;
+			updateMazeComplete(false);
+			setResetingGrid(false);
+		} else if (gridStructure.length > 0 && mount.current === 0) {
 			grid_structure.current = gridStructure;
 			if (startRow !== undefined && startColumn !== undefined) {
+				console.log('generating maze ...');
 				generateMaze(gridStructure[startRow][startColumn]).then(() => {
 					console.log('maze has been generated');
 					updateMazeComplete(true);
 				});
 			}
 			mount.current++;
+		} else if (mount.current === -1) {
+			mount.current++;
 		}
-	}, [startRow, startColumn, grid_structure]);
+	}, [startRow, startColumn, resetingGrid]);
 
 	useEffect(() => {
 		if (curNodeSetColor) {

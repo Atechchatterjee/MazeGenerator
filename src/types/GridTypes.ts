@@ -17,6 +17,8 @@ export interface GridContextProps {
     updateGridStructure: Function;
     mazeComplete: boolean;
     updateMazeComplete: Function;
+    resetingGrid:boolean;
+    setResetingGrid:Function;
 }
 
 

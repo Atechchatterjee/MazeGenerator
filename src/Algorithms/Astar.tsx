@@ -24,7 +24,7 @@ const Astar: React.FunctionComponent<Props> = (startNode, endNode) => {
 		GridContextProps
 	>(GridContext);
 	const grid_structure = useRef<GridElement[][]>([]);
-	const gridOp = new GridOperations(grid_structure);
+	let gridOp = new GridOperations(grid_structure);
 
 	// gets the neighbors which are not seperated by walls
 	const getAvailableNeigbors = (element: GridElement): Neighbors => {
@@ -34,10 +34,10 @@ const Astar: React.FunctionComponent<Props> = (startNode, endNode) => {
 			element.column
 		);
 
-		if (left?.walls.right === true) availableNeighbors.left = left;
-		if (right?.walls.left === true) availableNeighbors.right = right;
-		if (bottom?.walls.top === true) availableNeighbors.top = top;
-		if (top?.walls.bottom === true) availableNeighbors.top = top;
+		if (element.walls.left === false) availableNeighbors.left = left;
+		if (element.walls.right === false) availableNeighbors.right = right;
+		if (element.walls.top === false) availableNeighbors.top = top;
+		if (element.walls.bottom === false) availableNeighbors.bottom = bottom;
 
 		return availableNeighbors;
 	};
@@ -45,10 +45,8 @@ const Astar: React.FunctionComponent<Props> = (startNode, endNode) => {
 	useEffect(() => {
 		if (mazeComplete) {
 			grid_structure.current = gridStructure;
-             //console.log('available neighbors');
-             //console.log(getAvailableNeigbors(grid_structure.current[0][0]));
 		}
-	}, [gridStructure]);
+	}, [mazeComplete, gridStructure]);
 
 	return <></>;
 };

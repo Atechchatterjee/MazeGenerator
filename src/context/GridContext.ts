@@ -5,5 +5,7 @@ export const GridContext = createContext<GridContextProps>({
     gridStructure: [],
     updateGridStructure: () => {},
     mazeComplete: false,
-    updateMazeComplete: () => {}
+    updateMazeComplete: () => {},
+    resetingGrid: false,
+    setResetingGrid: () => {}
 }) 

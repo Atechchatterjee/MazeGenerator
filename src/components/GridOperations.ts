@@ -1,3 +1,4 @@
+import { MutableRefObject } from 'react';
 import {GridElement} from '../types/GridTypes';
 
 export interface Neighbors {
@@ -10,16 +11,15 @@ export interface Neighbors {
 export default class GridOperation {
 	visited: any = {};
 
-	grid_structure: any = {};
+	grid_structure: MutableRefObject<GridElement[][]> = {current:[]};
 
-	constructor(grid_structure: any) {
+	constructor(grid_structure: MutableRefObject<GridElement[][]>) {
 		this.grid_structure = grid_structure;
 	}
 
 	changeElement = (
 		element: GridElement,
 		walls?: any,
-		//color?: string
 	): GridElement => {
 		if (walls) {
 			const row: number = element.row;
@@ -51,17 +51,6 @@ export default class GridOperation {
 				},
 			};
 		}
-
-		//if (color) {
-			//return {
-				//width: element.width,
-				//height: element.height,
-				//row: element.row,
-				//column: element.column,
-				//walls: walls,
-				//color: color,
-			//};
-		//}
 
 		return element;
 	};
@@ -181,6 +170,21 @@ export default class GridOperation {
 
 		return elements;
 	};
+
+	resetGrid = ():GridElement[][] => {
+		for (const row of this.grid_structure.current) {
+			for (let element of row) {
+				element.walls = {
+					left: true,
+					right: true,
+					bottom: true,
+					top: true
+				}
+			}
+		}
+		console.log(this.grid_structure.current);
+		return this.grid_structure.current;
+	}
 
 	// shuffling the array of neighboring elements
 	shuffleNeigbhors = (neighbors: Neighbors) => {

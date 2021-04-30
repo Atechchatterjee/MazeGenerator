@@ -1,16 +1,26 @@
 import React, {useState, useContext, useRef, useEffect} from 'react';
 import {GridElement, GridContextProps} from '../types/GridTypes';
 import {GridContext} from '../context/GridContext';
+import {Button} from '@material-ui/core';
+import GridOperation from './GridOperations';
 
-const Grid: React.FC<{callback?: Function; mazeBorderColor: string}> = ({
-	callback,
+interface Props {
+	clickedCb?: Function;
+	mazeBorderColor: string;
+	resetCb?: Function;
+}
+
+const Grid: React.FC<Props> = ({
+	clickedCb: callback,
 	mazeBorderColor,
+	resetCb,
 }) => {
 	const {gridStructure, updateGridStructure} = useContext<GridContextProps>(
 		GridContext
 	);
 	const windowHeight = useRef<number>(window.innerHeight);
 	const windowWidth = useRef<number>(window.innerWidth);
+	const grid_structure = useRef<GridElement[][]>([]);
 
 	const cellHeight = useRef<number>(30);
 	const cellWidth = useRef<number>(30);
@@ -26,6 +36,7 @@ const Grid: React.FC<{callback?: Function; mazeBorderColor: string}> = ({
 		)
 	);
 	const mount = useRef<number>(0);
+	let gridOp = new GridOperation(grid_structure);
 
 	// creates the grid structure
 	const createGridStructure = () => {
@@ -59,11 +70,27 @@ const Grid: React.FC<{callback?: Function; mazeBorderColor: string}> = ({
 	useEffect(() => {
 		if (mount.current === 0) createGridStructure();
 		mount.current++;
-	}, [gridStructure]);
+		if (gridStructure.length > 0) {
+			grid_structure.current = gridStructure;
+			gridOp = new GridOperation(grid_structure);
+		}
+	}, [gridStructure, grid_structure]);
 
 	// creating the actual grid
 	return (
 		<div style={{textAlign: 'center'}}>
+			<Button
+				variant="contained"
+				color="primary"
+				onClick={() => {
+					mount.current = 0;
+					updateGridStructure(gridOp.resetGrid());
+					createGridStructure();
+					if (resetCb) resetCb();
+				}}
+			>
+				Reset
+			</Button>
 			<table
 				style={{
 					border: `${borderWidth.current}px solid black`,
