@@ -113,7 +113,9 @@ const RecursiveBackTrack: React.FC<{
 		if (resetingGrid) {
 			mount.current = -1;
 			updateMazeComplete(false);
-			setResetingGrid(false);
+			timeout(1000).then(() => {
+				setResetingGrid(false);
+			});
 		} else if (gridStructure.length > 0 && mount.current === 0) {
 			grid_structure.current = gridStructure;
 			if (startRow !== undefined && startColumn !== undefined) {

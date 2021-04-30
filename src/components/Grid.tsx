@@ -1,23 +1,18 @@
-import React, {useState, useContext, useRef, useEffect} from 'react';
+import React, {useContext, useRef, useEffect} from 'react';
 import {GridElement, GridContextProps} from '../types/GridTypes';
 import {GridContext} from '../context/GridContext';
-import {Button} from '@material-ui/core';
 import GridOperation from './GridOperations';
+import {CircularProgress} from '@material-ui/core';
 
 interface Props {
 	clickedCb?: Function;
 	mazeBorderColor: string;
-	resetCb?: Function;
 }
 
-const Grid: React.FC<Props> = ({
-	clickedCb: callback,
-	mazeBorderColor,
-	resetCb,
-}) => {
-	const {gridStructure, updateGridStructure} = useContext<GridContextProps>(
-		GridContext
-	);
+const Grid: React.FC<Props> = ({clickedCb: callback, mazeBorderColor}) => {
+	const {gridStructure, updateGridStructure, resetingGrid} = useContext<
+		GridContextProps
+	>(GridContext);
 	const windowHeight = useRef<number>(window.innerHeight);
 	const windowWidth = useRef<number>(window.innerWidth);
 	const grid_structure = useRef<GridElement[][]>([]);
@@ -74,86 +69,87 @@ const Grid: React.FC<Props> = ({
 			grid_structure.current = gridStructure;
 			gridOp = new GridOperation(grid_structure);
 		}
-	}, [gridStructure, grid_structure]);
+		if (resetingGrid) {
+			mount.current = 0;
+			updateGridStructure(gridOp.resetGrid());
+			createGridStructure();
+		}
+	}, [resetingGrid, gridStructure, grid_structure]);
 
 	// creating the actual grid
 	return (
-		<div style={{textAlign: 'center'}}>
-			<Button
-				variant="contained"
-				color="primary"
-				onClick={() => {
-					mount.current = 0;
-					updateGridStructure(gridOp.resetGrid());
-					createGridStructure();
-					if (resetCb) resetCb();
-				}}
-			>
-				Reset
-			</Button>
-			<table
-				style={{
-					border: `${borderWidth.current}px solid black`,
-					borderCollapse: 'collapse',
-					float: 'left',
-				}}
-			>
-				<tbody>
-					{gridStructure.map((rows) => {
-						return (
-							<tr>
-								{rows.map(({width, height, row, column, walls, color}) => {
-									return (
-										<td
-											className="cell"
-											onClick={() => {
-												if (callback) callback({row, column});
-											}}
-											id={`${row}-${column}`}
-											style={{
-												height: `${height}px`,
-												width: `${width}px`,
-												float: 'left',
-												backgroundColor: `${color}`,
-												borderCollapse: 'collapse',
-												borderLeft: `${
-													walls.left
-														? borderWidth.current + 'px solid black'
-														: borderWidth.current +
-														  'px solid ' +
-														  mazeBorderColor
-												}`,
-												borderRight: `${
-													walls.right
-														? borderWidth.current + 'px solid black'
-														: borderWidth.current +
-														  'px solid ' +
-														  mazeBorderColor
-												}`,
-												borderTop: `${
-													walls.top
-														? borderWidth.current + 'px solid black'
-														: borderWidth.current +
-														  'px solid ' +
-														  mazeBorderColor
-												}`,
-												borderBottom: `${
-													walls.bottom
-														? borderWidth.current + 'px solid black'
-														: borderWidth.current +
-														  'px solid ' +
-														  mazeBorderColor
-												}`,
-												cursor: 'pointer',
-											}}
-										></td>
-									);
-								})}
-							</tr>
-						);
-					})}
-				</tbody>
-			</table>
+		<div style={{margin: '8% 25%'}}>
+			{resetingGrid ? (
+				<CircularProgress
+					style={{margin: '22% 45%'}}
+					size={40}
+					color="secondary"
+				/>
+			) : (
+				<table
+					style={{
+						border: `${borderWidth.current}px solid black`,
+						borderCollapse: 'collapse',
+						float: 'left',
+					}}
+				>
+					<tbody>
+						{gridStructure.map((rows) => {
+							return (
+								<tr>
+									{rows.map(({width, height, row, column, walls, color}) => {
+										return (
+											<td
+												className="cell"
+												onClick={() => {
+													if (callback) callback({row, column});
+												}}
+												id={`${row}-${column}`}
+												style={{
+													height: `${height}px`,
+													width: `${width}px`,
+													float: 'left',
+													backgroundColor: `${color}`,
+													borderCollapse: 'collapse',
+													borderLeft: `${
+														walls.left
+															? borderWidth.current + 'px solid black'
+															: borderWidth.current +
+															  'px solid ' +
+															  mazeBorderColor
+													}`,
+													borderRight: `${
+														walls.right
+															? borderWidth.current + 'px solid black'
+															: borderWidth.current +
+															  'px solid ' +
+															  mazeBorderColor
+													}`,
+													borderTop: `${
+														walls.top
+															? borderWidth.current + 'px solid black'
+															: borderWidth.current +
+															  'px solid ' +
+															  mazeBorderColor
+													}`,
+													borderBottom: `${
+														walls.bottom
+															? borderWidth.current + 'px solid black'
+															: borderWidth.current +
+															  'px solid ' +
+															  mazeBorderColor
+													}`,
+													cursor: 'pointer',
+												}}
+											></td>
+										);
+									})}
+								</tr>
+							);
+						})}
+					</tbody>
+				</table>
+			)}
 		</div>
 	);
 };

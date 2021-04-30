@@ -9,6 +9,7 @@ import {Alert} from '@material-ui/lab';
 import {BlockPicker} from 'react-color';
 import './App.css';
 import {Button} from '@material-ui/core';
+import NavBar from './components/Navbar';
 
 const App: React.FC = () => {
 	const [gridStructure, updateGridStructure] = useState<GridElement[][]>([]);
@@ -28,80 +29,112 @@ const App: React.FC = () => {
 
 	useEffect(() => {
 		setOpenStackBar(mazeComplete);
-	}, [mazeComplete]);
+		if (resetingGrid) {
+			setSelectedColor('#A0BAD3');
+			updateStartColumn(undefined);
+			updateStartRow(undefined);
+		}
+	}, [resetingGrid, mazeComplete]);
 
-	return (
-		<div className="main">
-			<GridContext.Provider
-				value={{
-					gridStructure,
-					updateGridStructure,
-					mazeComplete,
-					updateMazeComplete,
-					resetingGrid,
-					setResetingGrid,
+	const ColorPicker: React.FC = () => {
+		return (
+			<Button
+				variant="contained"
+				color="primary"
+				onClick={() => setToggleColorSelector(!toggleColorSelector)}
+			>
+				Pick Color
+			</Button>
+		);
+	};
+	const ResetBtn: React.FC = () => {
+		return (
+			<Button
+				variant="contained"
+				color="primary"
+				onClick={() => {
+					setResetingGrid(true);
+					setSelectedColor('#A0BAD3');
+					updateStartColumn(undefined);
+					updateStartRow(undefined);
 				}}
 			>
-				<Grid
-					clickedCb={({row, column}: {row: number; column: number}) => {
-						updateStartRow(row);
-						updateStartColumn(column);
-						updateMazeComplete(false);
+				Reset
+			</Button>
+		);
+	};
+
+	return (
+		<div>
+			<div className="main">
+				<GridContext.Provider
+					value={{
+						gridStructure,
+						updateGridStructure,
+						mazeComplete,
+						updateMazeComplete,
+						resetingGrid,
+						setResetingGrid,
 					}}
-					resetCb={() => {
-						setResetingGrid(true);
-						setSelectedColor('#A0BAD3');
-						updateStartColumn(undefined);
-						updateStartRow(undefined);
-					}}
-					mazeBorderColor={selectedColor}
-				/>
-				<RecursiveBackTrack
-					startColumn={startColumn}
-					startRow={startRow}
-					mazeBorderColor={selectedColor}
-				/>
-				{mazeComplete ? (
-					<Astar
-						startNode={gridStructure[0][0]}
-						endNode={
-							gridStructure[gridStructure.length - 1][
-								gridStructure[0].length - 1
-							]
-						}
+				>
+					<NavBar
+						selectedColor={selectedColor}
+						setSelectedColor={setSelectedColor}
 					/>
-				) : (
-					<></>
-				)}
-				<div style={{float: 'left', marginLeft: '4%'}}>
-					<Button
-						variant="contained"
-						color="primary"
-						onClick={() => setToggleColorSelector(!toggleColorSelector)}
-					>
-						Pick Color
-					</Button>
-					{toggleColorSelector ? (
-						<div style={{marginTop: '5%'}}>
-							<BlockPicker
-								color={selectedColor}
-								colors={['#A0BAD3', '#37d67a', '#ff8a65', '#555555', '#697689']}
-								onChangeComplete={(e: any) => setSelectedColor(e.hex)}
-							/>
-						</div>
+					<Grid
+						clickedCb={({row, column}: {row: number; column: number}) => {
+							updateStartRow(row);
+							updateStartColumn(column);
+							updateMazeComplete(false);
+						}}
+						mazeBorderColor={selectedColor}
+					/>
+					<RecursiveBackTrack
+						startColumn={startColumn}
+						startRow={startRow}
+						mazeBorderColor={selectedColor}
+					/>
+					{mazeComplete ? (
+						<Astar
+							startNode={gridStructure[0][0]}
+							endNode={
+								gridStructure[gridStructure.length - 1][
+									gridStructure[0].length - 1
+								]
+							}
+						/>
 					) : (
 						<></>
 					)}
-				</div>
-				<Snackbar
-					open={openSnackBar}
-					autoHideDuration={3000}
-					onClose={() => setOpenStackBar(false)}
-					anchorOrigin={{vertical, horizontal}}
-				>
-					<Alert severity="success">Maze has been Generated!</Alert>
-				</Snackbar>
-			</GridContext.Provider>
+					<div style={{float: 'left', marginLeft: '4%'}}>
+						{toggleColorSelector ? (
+							<div style={{marginTop: '5%'}}>
+								<BlockPicker
+									color={selectedColor}
+									colors={[
+										'#A0BAD3',
+										'#37d67a',
+										'#ff8a65',
+										'#555555',
+										'#697689',
+									]}
+									onChangeComplete={(e: any) => setSelectedColor(e.hex)}
+								/>
+							</div>
+						) : (
+							<></>
+						)}
+					</div>
+					<Snackbar
+						open={openSnackBar}
+						autoHideDuration={3000}
+						onClose={() => setOpenStackBar(false)}
+						anchorOrigin={{vertical, horizontal}}
+					>
+						<Alert severity="success">Maze has been Generated!</Alert>
+					</Snackbar>
+				</GridContext.Provider>
+			</div>
 		</div>
 	);
 };
